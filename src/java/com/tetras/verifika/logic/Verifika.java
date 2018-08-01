@@ -28,7 +28,8 @@ public class Verifika {
     /**
      * Spustenie Verifiky nad zadanymi subormi
      */
-    public void checkFiles(){
+    public boolean checkFiles(){
+        boolean noError = false;
         String command = Constants.VERIFIKA_EXE + " -files " + this.files + " -profile " + this.profile + " -type " + Constants.REPORT_TYPE + " -result " + reportOutput;
         System.out.println("Spustam Verifiku: " + command);
         String ret = "";
@@ -38,6 +39,9 @@ public class Verifika {
             BufferedReader bri = new BufferedReader(new InputStreamReader(p.getInputStream()));
             while ((line = bri.readLine()) != null) {
               ret+=line;
+              if(line.contains("No errors found")){
+                  noError = true;
+              }
             }
             System.out.println(ret);
             bri.close();
@@ -46,7 +50,7 @@ public class Verifika {
         catch (Exception err) {
           err.printStackTrace();
         }
-        return;
+        return noError;
         
     }
 }

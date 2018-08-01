@@ -22,15 +22,15 @@ public class TermBase {
     }
 
     public TermBase() {
-        sourceValues = new ArrayList<>();
-        destValues = new ArrayList<>();
+        sourceValues = new ArrayList();
+        destValues = new ArrayList();
     }
 
     public TermBase(String sourceLanguage, String destLanguage) {
         this.sourceLanguage = sourceLanguage;
         this.destLanguage = destLanguage;
-        sourceValues = new ArrayList<>();
-        destValues = new ArrayList<>();
+        sourceValues = new ArrayList();
+        destValues = new ArrayList();
     }
 
     public String getSourceLanguage() {

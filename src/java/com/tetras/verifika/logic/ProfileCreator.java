@@ -30,6 +30,7 @@ public class ProfileCreator {
      * @return
      */
     public String createProfile(String termbaseFile) {
+        File newProfile = null;
         try {
             String termbaseString = "";
 
@@ -38,10 +39,11 @@ public class ProfileCreator {
             //Terminologia nie je prazdna
             if (!termbase.sourceValues.isEmpty()) {
                 for (int i = 0; i < termbase.sourceValues.size(); i++) {
-                    String source = termbase.sourceValues.get(i);
-                    String correct = termbase.destValues.get(i);
+                    String source = termbase.sourceValues.get(i).replace("\"", "\\\"").replace("/", "\\/");
+                    String correct = termbase.destValues.get(i).replace("\"", "\\\"").replace("/", "\\/");
                     if (!source.matches("NULL") && !correct.matches("NULL")) {
-                        termbaseString += "{\"Correct\":[\"" + correct + "\"],\"Forbidden\":[],\"ReferenceGlossary\":\"" + termbaseFile.replace("\\", "\\\\") + "\",\"Source\":\"" + source + "\"},";
+                        termbaseString += "{\"CorrectTranslations\":[\"" + correct + "\"],\"ForbiddenTranslations\":[],\"ReferenceGlossary\":\"" + termbaseFile.replace("\\", "\\\\") + 
+                               "\",\"SourceLanguageId\":" + termbase.sourceLanguage + ",\"SourceTerm\":\"" + source + "\",\"TargetLanguageId\":" + termbase.destLanguage + "},";
                     }
                 }
                 termbaseString = termbaseString.substring(0, termbaseString.length() - 1);
@@ -49,11 +51,15 @@ public class ProfileCreator {
             }
 
             
-            File newProfile = new File(Constants.VERIFIKA_PROFILES_DIR + File.separator + profile);
+            newProfile = new File(Constants.VERIFIKA_PROFILES_DIR + File.separator + profile);
             FileUtils.writeStringToFile(newProfile, profileString, "UTF-8");
 
         } catch (IOException ex) {
             Logger.getLogger(ProfileCreator.class.getName()).log(Level.SEVERE, null, ex);
+            return "";
+        }
+        if(newProfile.exists()){
+            return newProfile.getAbsolutePath();
         }
         return "";
     }

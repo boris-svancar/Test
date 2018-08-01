@@ -29,44 +29,42 @@ import org.w3c.dom.NodeList;
  * @author Boris
  */
 public class CheckLockSegments {
-    
-    
+
     private List<File> original;
     private List<File> translation;
-    private List<XliffException> exceptions = new ArrayList<>();
-    
-    
+    private List<XliffException> exceptions = new ArrayList();
+
     /**
      * Porovnanie vsetkych Xlifov
+     *
      * @param o
      * @param t
-     * @return 
+     * @return
      */
     public boolean analyzeAllFiles(List<File> o, List<File> t) {
 
         original = o;
         translation = t;
-       
-        setExceptions(new ArrayList<>());
-        
+
+        setExceptions(new ArrayList());
+
         //Prechod vsetkymi povodnymi Xlifmi a najdenie a porovnanie s prelozenym
         for (int i = 0; i < original.size(); i++) {
             File originalFile = original.get(i);
             File translatedFile = findTranslatedFileByName(originalFile.getName());
             if (translatedFile != null) {
                 analyzeFiles(originalFile, translatedFile);
-            } 
+            }
         }
         return true;
 
     }
 
-    
-    
     /**
      * Najdeneio prelozeneho Xlifu podla nazvu
+     *
      * @param name
-     * @return 
+     * @return
      */
     public File findTranslatedFileByName(String name) {
         for (int i = 0; i < translation.size(); i++) {
@@ -78,9 +76,6 @@ public class CheckLockSegments {
         return null;
     }
 
-    
-    
-    
     public void analyzeFiles(File o, File t) {
         try {
             DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
@@ -89,11 +84,11 @@ public class CheckLockSegments {
             Document targetDoc = dBuilder.parse(t);
             originalDoc.getDocumentElement().normalize();
             targetDoc.getDocumentElement().normalize();
-            
+
             //nacitanie vsetkych uzlov trans-unit (tieto uzly obsahuju zdrojovy a cielovy text)
             NodeList originalNodeList = originalDoc.getElementsByTagName("trans-unit");
             NodeList targetNodeList = targetDoc.getElementsByTagName("trans-unit");
-            
+
             //prechod vsetkymi Trans-unit
             for (int i = 0; i < originalNodeList.getLength(); i++) {
                 Node transUnitNode = originalNodeList.item(i);
@@ -104,7 +99,7 @@ public class CheckLockSegments {
                         Node sdlNode = sdlList.item(count);
                         if (sdlNode.getNodeType() == Node.ELEMENT_NODE) {
                             Element sdlElement = (Element) sdlNode;
-                            
+
                             //Povodny segment je zamknuty
                             if (sdlElement.hasAttribute("locked")) {
                                 if (sdlElement.getAttribute("locked").equals("true")) {
@@ -120,7 +115,7 @@ public class CheckLockSegments {
             }
 
         } catch (Exception ex) {
-            
+
         }
     }
 
@@ -147,7 +142,6 @@ public class CheckLockSegments {
                         String originalTarget = "";
                         String translatedSource = "";
                         String translatedTarget = "";
-                        
 
                         //zistenie ci je aj v subore od prekladatela zamknuty segment
                         NodeList sdlSegTargetNodeList = element.getElementsByTagName("sdl:seg");
@@ -239,7 +233,7 @@ public class CheckLockSegments {
                                 }
                             }
                         }
-                        
+
                         if (!locked || !originalSource.equals(translatedSource) || !originalTarget.equals(translatedTarget)) {
                             getExceptions().add(new XliffException(fileName, segmentId, originalSource, translatedSource, originalTarget, translatedTarget, "locked", (locked ? "locked" : "unlocked")));
                         }
@@ -264,10 +258,8 @@ public class CheckLockSegments {
         this.exceptions = exceptions;
     }
 
-    
-    
-    public void exportToExcel(String exportFile){
-        
+    public void exportToExcel(String exportFile) {
+
         try {
             XSSFWorkbook workbook = new XSSFWorkbook();
             XSSFSheet sheet = workbook.createSheet("Export");
@@ -278,11 +270,11 @@ public class CheckLockSegments {
             style.setFont(font);
             int columnIndex = 0;
             int rowIndex = 0;
-            String[] headers = {"Názov súboru", "ID segmentu", "Zdrojový text - pôvodný súbor", "Zdrojový text - preložený súbor", "Preklad - pôvodný súbor", "Preklad - preložený súbor", "Status pôvodný súbor", "Status preložený súbor"};
+            String[] headers = {"Dateiname", "ID des Segmentes", "Ausgangstext – ursprüngliche Datei", "Ausgangstext – übersetzte Datei", "Übersetzung – ursprüngliche Datei",
+                "Übersetzung – übersetzte Datei", "Status – ursprüngliche Datei", "Status – übersetzte Datei"};
             Row row = sheet.createRow(rowIndex);
             Cell cell = null;
-            
-            //Nasla sa zmena v zamknutych segmentoch
+
             if (exceptions.size() > 0) {
                 for (int i = 0; i < headers.length; i++) {
                     String header = headers[i];
@@ -300,59 +292,55 @@ public class CheckLockSegments {
                     for (int j = 0; j < headers.length; j++) {
                         switch (j) {
                             case 0:
-                            writeCell(sheet, rowIndex, columnIndex, exception.getName());
-                            columnIndex++;
-                            break;
+                                writeCell(sheet, rowIndex, columnIndex, exception.getName());
+                                columnIndex++;
+                                break;
                             case 1:
-                            writeCell(sheet, rowIndex, columnIndex, exception.getId());
-                            columnIndex++;
-                            break;
+                                writeCell(sheet, rowIndex, columnIndex, exception.getId());
+                                columnIndex++;
+                                break;
                             case 2:
-                            writeCell(sheet, rowIndex, columnIndex, exception.getOldSourceText());
-                            columnIndex++;
-                            break;
+                                writeCell(sheet, rowIndex, columnIndex, exception.getOldSourceText());
+                                columnIndex++;
+                                break;
                             case 3:
-                            writeCell(sheet, rowIndex, columnIndex, exception.getNewSourceText());
-                            columnIndex++;
-                            break;
+                                writeCell(sheet, rowIndex, columnIndex, exception.getNewSourceText());
+                                columnIndex++;
+                                break;
                             case 4:
-                            writeCell(sheet, rowIndex, columnIndex, exception.getOldTargetText());
-                            columnIndex++;
-                            break;
+                                writeCell(sheet, rowIndex, columnIndex, exception.getOldTargetText());
+                                columnIndex++;
+                                break;
                             case 5:
-                            writeCell(sheet, rowIndex, columnIndex, exception.getNewTargetText());
-                            columnIndex++;
-                            break;
+                                writeCell(sheet, rowIndex, columnIndex, exception.getNewTargetText());
+                                columnIndex++;
+                                break;
                             case 6:
-                            writeCell(sheet, rowIndex, columnIndex, exception.getOldStatus());
-                            columnIndex++;
-                            break;
+                                writeCell(sheet, rowIndex, columnIndex, exception.getOldStatus());
+                                columnIndex++;
+                                break;
                             case 7:
-                            writeCell(sheet, rowIndex, columnIndex, exception.getNewStatus());
-                            columnIndex++;
-                            break;
+                                writeCell(sheet, rowIndex, columnIndex, exception.getNewStatus());
+                                columnIndex++;
+                                break;
 
                         }
                     }
 
                 }
                 FileOutputStream fileOut = new FileOutputStream(exportFile);
-                        workbook.write(fileOut);
+                workbook.write(fileOut);
                 fileOut.close();
-            }
-            
-            //Zmena v zamknutych segmentoch nenastala
-            else{
-                
+            } //Zmena v zamknutych segmentoch nenastala
+            else {
+
                 FileUtils.writeStringToFile(new File(exportFile.replace("LockedSegments", "LockedSegments_NoErrors").replaceAll(".xlsx", ".txt")), "NO ERRORS", "UTF-8");
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
         }
-    }                                        
+    }
 
-    
-    
     private void writeCell(XSSFSheet sheet, int rowIndex, int columnIndex, String val) {
         Row row = sheet.getRow(rowIndex);
         if (row == null) {
@@ -366,6 +354,4 @@ public class CheckLockSegments {
         cell.setCellValue(val);
     }
 
-    
-    
 }

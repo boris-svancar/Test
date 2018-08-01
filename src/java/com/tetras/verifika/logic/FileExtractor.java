@@ -45,6 +45,7 @@ public class FileExtractor {
         try {
             FileUtils.copyFile(translatorPackageFile, zipFile);
         } catch (Exception e) {
+            System.out.println("Nie je mozne skopirovat subor " + translatorPackageFile + " do suboru " + zipFile);
         }
         
         //Rozzipovanie balicka
@@ -88,7 +89,7 @@ public class FileExtractor {
         
         //Vyskladanie cesty k suborom na Verifiku podla source language
         File dirWithFiles = new File(extractDirPath + File.separator + targetLanguage);
-        if(dirWithFiles.exists() && dirWithFiles.isDirectory()){
+        if (dirWithFiles.exists() && dirWithFiles.isDirectory()){
             return dirWithFiles.getAbsolutePath() + File.separator;
         }
         
